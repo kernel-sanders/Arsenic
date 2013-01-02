@@ -1,0 +1,54 @@
+ $$$$$$\                                          $$\           
+$$  __$$\                                         \__|          
+$$ /  $$ | $$$$$$\   $$$$$$$\  $$$$$$\  $$$$$$$\  $$\  $$$$$$$\ 
+$$$$$$$$ |$$  __$$\ $$  _____|$$  __$$\ $$  __$$\ $$ |$$  _____|
+$$  __$$ |$$ |  \__|\$$$$$$\  $$$$$$$$ |$$ |  $$ |$$ |$$ /      
+$$ |  $$ |$$ |       \____$$\ $$   ____|$$ |  $$ |$$ |$$ |      
+$$ |  $$ |$$ |      $$$$$$$  |\$$$$$$$\ $$ |  $$ |$$ |\$$$$$$$\ 
+\__|  \__|\__|      \_______/  \_______|\__|  \__|\__| \_______|
+
+A configuration free ARP poisoning and credential extraction tool
+Tested on OSX 10.8.2 and Ubuntu 12.04
+
+Version: 0.1
+
+Author: KernelSanders (kernelsanders@icloud.com) and li0nize
+
+Dependancies: scapy, pcapy, libdnet, sslstrip, python-twisted-web, python-tk, nmap
+
+Usage: sudo python arsenic.py
+
+    Scan - scans the network for potential victims. Select victims by clicking on them in the list
+    Pwn - ARP spoof and sslstrip the victims, any credentials they enter will be displayed and logged
+    Close - Shut down everything, return the system to its normal state and exit
+
+IMPORTANT - OSX USERS:
+    From 10.7 on Apple has made 'net.inet.ip.scopedroute' read only due to an ARP kernel bug
+    To change it to '0' (which is nessesary or ipfw won't work) do the following:
+    1. sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.Bool "Kernel Flags" "net.inet.ip.scopedroute=0"
+    2. sudo plutil -convert xml1 /Library/Preferences/SystemConfiguration/com.apple.Boot.plist
+    3. Confirm the change with "sudo defaults read /Library/Preferences/SystemConfiguration/com.apple.Boot"
+        which should return: "Kernel Flags" = "net.inet.ip.scopedroute=0";
+    4. Confirm the file is pretty xml with "cat /Library/Preferences/SystemConfiguration/com.apple.Boot.plist"
+    5. reboot
+    6. Confirm the change has been made with "sysctl net.inet.ip.scopedroute" 
+        which should return: "net.inet.ip.scopedroute: 0"
+
+Detailed Description:
+    SSL, TLS, and https were supposed to solve the problem of credentials being readable
+    on a network as they are transmitted to servers. However, users can be arp spoofed, effectively
+    giving you control of all their traffic. From then on, any requests for https addresses made 
+    by the user can be replaced by http on the fly. This presents a nearly identical experience 
+    for the user. Browsers go to great lengths to alert users of expired or untrusted certificates, 
+    but have very little in the way of showing you are browsing on an insecure connection. Besides 
+    a missing lock icon or gold address bar, the user has no indication there is a potential 
+    security issue with their session. For this reason, they will likely browse as normal and when
+    they enter credentials to log into a site, Arsenic is there to extract them. Arsenic is built 
+    on the work of others, especially Moxie Marlinspike and his sslstrip tool. What Arsenic provides 
+    is a configuration free GUI environment to demonstrate this potential vulnerability.
+
+Known Issues:
+    - killsessions doesn't work reliably
+    - In some cases, google searches give a redirect notice or fail to load a clicked link
+    - SSL enabled google search bars (firefox) are immune
+    - Rare instances of the gui being unable to effectively close all subprocesses 
